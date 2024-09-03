@@ -53,8 +53,8 @@ sudo ninja -C build install
 ```
 git clone https://gitlab.freedesktop.org/mesa/mesa.git
 cd mesa
-git checkout -f origin/23.0 -b 23.0
-meson -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro -Dlibunwind=false -Dplatforms=x11 -Dprefix=/usr/local build
+git checkout -f mesa-24.0.0
+meson -Dgallium-drivers=panfrost,kmsro -Dvulkan-drivers=panfrost -Dplatforms=x11 -Dprefix=/usr/local build
 sudo ninja -C build install
 ```
 #### 2.3 编译 xserver:
