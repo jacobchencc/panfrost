@@ -1,9 +1,13 @@
 # panfrost
 panfrost integration for rockchip platform
 
-## rk356x Mali-G52
+## rk356x/rk3576 Mali-G52
 ### 1. Linux kernel部分修改：
-#### 1.1 修改arch/arm64/boot/dts/rockchip/rk3568.dtsi中的gpu节点
+#### 1.1 修改gpu dts配置
+#### rk356x:
+```
+    kernel 5.10: arch/arm64/boot/dts/rockchip/rk3568.dtsi
+    kernel 6.1: arch/arm64/boot/dts/rockchip/rk356x.dtsi
 
     gpu: gpu@fde60000 {
             compatible = "rockchip,rk3568-mali", "arm,mali-bifrost";
@@ -17,8 +21,86 @@ panfrost integration for rockchip platform
             operating-points-v2 = <&gpu_opp_table>;
             power-domains = <&power RK3568_PD_GPU>;                                                                                                          
             status = "disabled";
-    };  
+    };
 
+    gpu_opp_table: opp-table2 {
+        compatible = "operating-points-v2";
+
+        mbist-vmin = <825000 900000 950000>;
+        nvmem-cells = <&gpu_leakage>, <&core_pvtm>, <&mbist_vmin>;
+        nvmem-cell-names = "leakage", "pvtm", "mbist-vmin";
+        rockchip,pvtm-voltage-sel = <
+            0        84000   0
+            84001    91000   1
+            91001    100000  2
+        >;
+        rockchip,pvtm-ch = <0 5>;
+
+        opp-200000000 {
+            opp-hz = /bits/ 64 <200000000>;
+            opp-microvolt = <850000>;
+            opp-microvolt-L0 = <850000>;
+            opp-microvolt-L1 = <825000>;
+            opp-microvolt-L2 = <825000>;
+        };   
+        opp-300000000 {
+            opp-hz = /bits/ 64 <300000000>;
+            opp-microvolt = <850000>;
+            opp-microvolt-L0 = <850000>;
+            opp-microvolt-L1 = <825000>;
+            opp-microvolt-L2 = <825000>;
+        };   
+        opp-400000000 {
+            opp-hz = /bits/ 64 <400000000>;
+            opp-microvolt = <850000>;
+            opp-microvolt-L0 = <850000>;
+            opp-microvolt-L1 = <825000>;
+            opp-microvolt-L2 = <825000>;
+        };   
+        opp-600000000 {
+            opp-supported-hw = <0xfb 0xffff>;
+            opp-hz = /bits/ 64 <600000000>;
+            opp-microvolt = <875000>;
+            opp-microvolt-L0 = <875000>;
+            opp-microvolt-L1 = <825000>;
+            opp-microvolt-L2 = <825000>;
+        };
+        opp-700000000 {
+            opp-hz = /bits/ 64 <700000000>;                                                                                                                                              
+            opp-microvolt = <950000>;
+            opp-microvolt-L0 = <950000>;
+            opp-microvolt-L1 = <900000>;
+            opp-microvolt-L2 = <850000>;
+        };   
+        opp-800000000 {
+            opp-hz = /bits/ 64 <800000000>;
+            opp-microvolt = <1000000>;
+            opp-microvolt-L0 = <1000000>;
+            opp-microvolt-L1 = <950000>;
+            opp-microvolt-L2 = <900000>;
+        };   
+
+    }; 
+```
+#### rk3576:
+```
+    kernel 6.1: arch/arm64/boot/dts/rockchip/rk3576.dtsi
+    gpu: gpu@27800000 {
+            compatible = "arm,mali-bifrost";
+            reg = <0x0 0x27800000 0x0 0x20000>;
+            interrupts = <GIC_SPI 347 IRQ_TYPE_LEVEL_HIGH>,
+                         <GIC_SPI 348 IRQ_TYPE_LEVEL_HIGH>,
+                         <GIC_SPI 349 IRQ_TYPE_LEVEL_HIGH>;
+            interrupt-names = "job", "mmu", "gpu";
+            clocks = <&scmi_clk CLK_GPU>, <&cru CLK_GPU>;
+            clock-names = "gpu", "bus";
+			assigned-clocks = <&cru CLK_GPU>;
+			assigned-clock-rates = <800000000>;
+            power-domains = <&power RK3576_PD_GPU>;
+			dynamic-power-coefficient = <1625>;
+            status = "disabled";
+    };
+```
 
 #### 1.2 修改arch/arm64/configs/rockchip_linux_defconfig，启用panfrost驱动
 ```
@@ -53,15 +135,16 @@ sudo ninja -C build install
 ```
 git clone https://gitlab.freedesktop.org/mesa/mesa.git
 cd mesa
-git checkout -f mesa-24.0.0
-meson -Dgallium-drivers=panfrost,kmsro -Dvulkan-drivers=panfrost -Dplatforms=x11 -Dprefix=/usr/local build
+git checkout -f mesa-24.3.2 -b 24.3.2
+# 如需wayland后端支持，设置-Dplatforms=x11,wayland
+meson build -Dvulkan-drivers=panfrost -Dgallium-drivers=panfrost -Dplatforms=x11 -Dglx=auto -Dprefix=/usr/local
 sudo ninja -C build install
 ```
 #### 2.3 编译 xserver:
 ```
 git clone https://gitlab.freedesktop.org/xorg/xserver.git
 cd xserver
-git checkout -f xorg-server-21.1.3 -b xorg-server-21.1.3
+git checkout -f xorg-server-21.1.14 -b xserver-21.1.14
 meson build -D prefix=/usr/local -D glamor=true
 sudo ninja -C build install
 sudo mkdir -p /var/local/log
