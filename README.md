@@ -1,7 +1,7 @@
 # panfrost
 panfrost integration for rockchip platform
 
-## rk356x/rk3576 Mali-G52
+## rk356x / rk3576 Mali-G52
 ### 1. Linux kernel部分修改：
 #### 1.1 修改gpu dts配置
 #### rk356x:
@@ -106,7 +106,30 @@ panfrost integration for rockchip platform
 ```
 CONFIG_DRM_PANFROST=y
 ```
-#### 1.3 重新编译linux kernel，烧写boot.img，从启动信息中确认panfrost驱动加载情况：
+
+#### 1.3 (可选) 一些版本Mesa获取drm busid时调用 DRM_IOCTL_GET_UNIQUE 可能出现错误，可以对内核 drm 驱动做如下修改：
+```
+diff --git a/drivers/gpu/drm/drm_ioctl.c b/drivers/gpu/drm/drm_ioctl.c
+index 6172f786012b..dbdfaa755bea 100644
+--- a/drivers/gpu/drm/drm_ioctl.c
++++ b/drivers/gpu/drm/drm_ioctl.c
+@@ -121,6 +121,13 @@ int drm_getunique(struct drm_device *dev, void *data,
+ 
+        mutex_lock(&dev->master_mutex);
+        master = file_priv->master;
++
++       if (master == NULL) {
++               u->unique_len = 0;
++               mutex_unlock(&dev->master_mutex);
++               return 0;
++       }
++
+        if (u->unique_len >= master->unique_len) {
+                if (copy_to_user(u->unique, master->unique, master->unique_len)) {
+                        mutex_unlock(&dev->master_mutex);
+```
+
+#### 1.4 重新编译linux kernel，烧写boot.img，从启动信息中确认panfrost驱动加载情况：
 
 ```
 [    3.267980] panfrost fde60000.gpu: clock rate = 594000000
