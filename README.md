@@ -94,10 +94,10 @@ panfrost integration for rockchip platform
             interrupt-names = "job", "mmu", "gpu";
             clocks = <&scmi_clk CLK_GPU>, <&cru CLK_GPU>;
             clock-names = "gpu", "bus";
-			assigned-clocks = <&cru CLK_GPU>;
-			assigned-clock-rates = <800000000>;
+            assigned-clocks = <&cru CLK_GPU>;
+            assigned-clock-rates = <800000000>;
             power-domains = <&power RK3576_PD_GPU>;
-			dynamic-power-coefficient = <1625>;
+            dynamic-power-coefficient = <1625>;
             status = "disabled";
     };
 ```
