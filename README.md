@@ -92,13 +92,47 @@ panfrost integration for rockchip platform
                          <GIC_SPI 348 IRQ_TYPE_LEVEL_HIGH>,
                          <GIC_SPI 349 IRQ_TYPE_LEVEL_HIGH>;
             interrupt-names = "job", "mmu", "gpu";
-            clocks = <&scmi_clk CLK_GPU>, <&cru CLK_GPU>;
+            clocks = <&cru CLK_GPU>, <&cru PCLK_GPU_ROOT>;
             clock-names = "gpu", "bus";
             assigned-clocks = <&cru CLK_GPU>;
             assigned-clock-rates = <800000000>;
             power-domains = <&power RK3576_PD_GPU>;
+            operating-points-v2 = <&gpu_opp_table>;
             dynamic-power-coefficient = <1625>;
             status = "disabled";
+    };
+
+    gpu_opp_table: gpu-opp-table {
+        compatible = "operating-points-v2";
+
+        opp-300000000 {
+            opp-hz = /bits/ 64 <300000000>;
+            opp-microvolt = <712500 712500 875000>;
+        };   
+        opp-400000000 {
+            opp-hz = /bits/ 64 <400000000>;
+            opp-microvolt = <712500 712500 875000>;
+        };   
+        opp-500000000 {
+            opp-hz = /bits/ 64 <500000000>;
+            opp-microvolt = <712500 712500 875000>;
+        };   
+        opp-600000000 {
+            opp-hz = /bits/ 64 <600000000>;
+            opp-microvolt = <712500 712500 875000>;
+        };   
+        opp-700000000 {
+            opp-hz = /bits/ 64 <700000000>;
+            opp-microvolt = <712500 712500 875000>;
+        };   
+        opp-800000000 {
+            opp-hz = /bits/ 64 <800000000>;
+            opp-microvolt = <812500 812500 875000>;
+        };
+        opp-900000000 {
+            opp-hz = /bits/ 64 <900000000>;                                                                                                                                
+            opp-microvolt = <875000 875000 875000>;
+        };
     };
 ```
 
